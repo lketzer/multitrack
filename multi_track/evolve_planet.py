@@ -23,16 +23,16 @@ def evolve_one_planet(pl_folder_pair,
     Function evolves one planet (pl) at a time, but through all stellar
     evolutionary tracks specified in 'evo_track_dict_list' (see below
     for details).
-    It also makes sure the results are saved in the correct 
+    It also makes sure the results are saved in the correct
     folder-subfolder structure which must have been previously created!
     All calculations for one planet belong to each other (same host star
     initial parameters), but the planets themselves are independent of
-    each other. Each time this function is called represents an 
+    each other. Each time this function is called represents an
     independent process (important for multiprocessing).
 
     Parameters:
     -----------
-    pl_folder_pair (list): a list with two elements, the first is the 
+    pl_folder_pair (list): a list with two elements, the first is the
                            folder name, the second the planet object
                            (e.g. ["planet1", pl_object1])
 
@@ -41,10 +41,10 @@ def evolve_one_planet(pl_folder_pair,
     initial_step_size (float): Initial step size for the integration
                                (e.g. 0.1 Myr)
 
-    epsilon (float): Evaporation efficiency (constant); should be a 
+    epsilon (float): Evaporation efficiency (constant); should be a
                      value between 0 and 1 in the platypos framework
 
-    K_on (str): "yes" to use K-estimation, or "no" to set K=1 
+    K_on (str): "yes" to use K-estimation, or "no" to set K=1
                 (see Beta_K_functions in platypos_package)
 
     beta_on (str): "yes" to use beta-estimation, or "no" to set beta=1
@@ -56,10 +56,10 @@ def evolve_one_planet(pl_folder_pair,
                                 parameters which are different is passed.
                                 This is for a sample where each planet
                                 has a different host and the tracks have
-                                to be tailored to the host star 
+                                to be tailored to the host star
                                 mass/saturation luminosity.
-    NOTE: there are TWO Options: 
-        (1) track dictionary contains all 9 parameters 
+    NOTE: there are TWO Options:
+        (1) track dictionary contains all 9 parameters
             (e.g. if host star is the same for all planets in sample)
         (2) the track dictionary contains only 3 parameters (t_sat,\
             dt_drop, Lx_drop_factor) and the remaining parameters have
@@ -137,11 +137,11 @@ def evolve_one_planet(pl_folder_pair,
         # already stored in pl.Lx_sat_info
         # (this is needed to scale Lx_1Gyr and Lx_5Gyr correctly)
         # There are currently 4 options:
-        #     1) "OwWu17": use L_XUV as given in Owen & Wu 2017 
+        #     1) "OwWu17": use L_XUV as given in Owen & Wu 2017
         #                  (NOTE: their XUV values seem to be very low!)
         #     2) "OwWu17_X=HE": use Owen & Wu 2017 XUV saturation value
         #                       as X-ray saturation value
-        #     3) "Tu15": from Tu et al. (2015); they use 
+        #     3) "Tu15": from Tu et al. (2015); they use
         #                               Lx/Lbol = 10^(-3.13)*(L_bol_star)
         #     4) "1e-3": simple approximation of saturation regime:
         #                               Lx/Lbol ~ 10^(-3))
@@ -150,7 +150,7 @@ def evolve_one_planet(pl_folder_pair,
         if Lx_calculation == "OwWu17":
             # OwWu 17
             # NOTE: since platypos expects a X-ray saturation luminosity,
-            # and not an XUV sat. lum, for the OwWu17 formula we need to 
+            # and not an XUV sat. lum, for the OwWu17 formula we need to
             # invert Lxuv_all, so that we get the corresponding Lx for all Lxuv
             Lx_age_OW17 = undo_what_Lxuv_all_does(
                 L_high_energy(pl.age, pl.mass_star))
@@ -185,7 +185,7 @@ def evolve_one_planet(pl_folder_pair,
             Lbol = 10**mass_luminosity_relation(pl.mass_star)
             Lx_sat_Tu15 = 10**(-3.13) * Lbol * const.L_sun.cgs.value
             # for the Tu15 tracks we scale the hardcoded values for the
-            # SUN at 1 & 5 Gyr up and down based on the difference in a 
+            # SUN at 1 & 5 Gyr up and down based on the difference in a
             # star's Lx_sat as compared to the Sun
             scaling_factor = Lx_sat_Tu15 / \
                 (10**(-3.13) * (1.0) * const.L_sun.cgs.value)
@@ -260,14 +260,15 @@ def evolve_one_planet(pl_folder_pair,
                             + str(R_thermal)
                         t.write(file_content)
 
+
 def evolve_one_planet_along_one_track(folder_planet_track,
                                       t_final, initial_step_size,
                                       epsilon, K_on, beta_on,
                                       path_for_saving):
     """
     Function evolves one planet (pl) at a time through one stellar
-    evolutionary track. 
-    It also makes sure the results are saved in the correct 
+    evolutionary track.
+    It also makes sure the results are saved in the correct
     folder-subfolder structure  which must have been previously created!
     Each time this function is called represents an independent process
     (important for multiprocessing).
@@ -275,39 +276,39 @@ def evolve_one_planet_along_one_track(folder_planet_track,
     Parameters:
     -----------
     folder_planet_track (list): a list with three elements, the first is
-    							the folder name, the second the planet
-    							object, the third is a track dictionary
-    							(e.g. ["planet1", pl_object1, track_dict1])
-    
-    NOTE: track_dict is a dictionary with either all 9 parameters per 
-    	  track are specified, or a list of track parameters which are
-    	  different is passed. This is for a sample where each planet
-    	  has a different host and the tracks have to be tailored to the
+                                the folder name, the second the planet
+                                object, the third is a track dictionary
+                                (e.g. ["planet1", pl_object1, track_dict1])
+
+    NOTE: track_dict is a dictionary with either all 9 parameters per
+          track are specified, or a list of track parameters which are
+          different is passed. This is for a sample where each planet
+          has a different host and the tracks have to be tailored to the
           host star mass/saturation luminosity.
-          There are TWO Options: 
-        	(1) track dictionary contains all 9 parameters 
-            	(e.g. if host star is the same for all planets in sample)
-        	(2) the track dictionary contains only 3 parameters (t_sat,
-            	dt_drop, Lx_drop_factor) and the remaining parameters
-            	have to be tailored to each host star (t_start, t_curr, 
-            	t_5Gyr,Lx_curr, Lx_5Gyr, Lx_max)
-	
+          There are TWO Options:
+                (1) track dictionary contains all 9 parameters
+                (e.g. if host star is the same for all planets in sample)
+                (2) the track dictionary contains only 3 parameters (t_sat,
+                dt_drop, Lx_drop_factor) and the remaining parameters
+                have to be tailored to each host star (t_start, t_curr,
+                t_5Gyr,Lx_curr, Lx_5Gyr, Lx_max)
+
     t_final (float): end time of the integration (e.g. 3, 5, 10 Gyr)
 
     initial_step_size (float): Initial step size for the integration
-    						   (e.g. 0.1 Myr)
+                                                   (e.g. 0.1 Myr)
 
-    eepsilon (float): Evaporation efficiency (constant); should be a 
+    eepsilon (float): Evaporation efficiency (constant); should be a
                      value between 0 and 1 in the platypos framework
 
-    K_on (str): "yes" to use K-estimation, or "no" to set K=1 
+    K_on (str): "yes" to use K-estimation, or "no" to set K=1
                 (see Beta_K_functions in platypos_package)
 
     beta_on (str): "yes" to use beta-estimation, or "no" to set beta=1
                    (see Beta_K_functions in platypos_package)
 
     path_for_saving (str): file path to master folder in which the
-    					   individual planet folders lie
+                                           individual planet folders lie
 
     Returns:
     --------
@@ -322,7 +323,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
 
     # Option 1
     if len(track_dict) == 9:
-    	# set planet name based on track params
+        # set planet name based on track params
         planet.set_name(
             t_final,
             initial_step_size,
@@ -363,7 +364,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
 
     # Option 2
     else:
-    	# calculate missing track parameters based on individual planet
+        # calculate missing track parameters based on individual planet
         # (e.g. in a sample where host star mass is different for each planet)
         # Need to set Lx_1Gyr & Lx_5Gyr based on the Lx_sat approximation used
         # We scale the parameters at 1 & 5 Gyr up and down for non-solar mass
@@ -372,15 +373,15 @@ def evolve_one_planet_along_one_track(folder_planet_track,
         # If you want a track with these values different, you need to pass a
         # complete dictionary
 
-		# here I need to select how Lx_sat was calculated. This info should be
+        # here I need to select how Lx_sat was calculated. This info should be
         # already stored in pl.Lx_sat_info
         # (this is needed to scale Lx_1Gyr and Lx_5Gyr correctly)
         # There are currently 4 options:
-        #     1) "OwWu17": use L_XUV as given in Owen & Wu 2017 
+        #     1) "OwWu17": use L_XUV as given in Owen & Wu 2017
         #                  (NOTE: their XUV values seem to be very low!)
         #     2) "OwWu17_X=HE": use Owen & Wu 2017 XUV saturation value
         #                       as X-ray saturation value
-        #     3) "Tu15": from Tu et al. (2015); they use 
+        #     3) "Tu15": from Tu et al. (2015); they use
         #                               Lx/Lbol = 10^(-3.13)*(L_bol_star)
         #     4) "1e-3": simple approximation of saturation regime:
         #                               Lx/Lbol ~ 10^(-3))
@@ -389,7 +390,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
         if Lx_calculation == "OwWu17":
             # OwWu 17
             # NOTE: since platypos expects a X-ray saturation luminosity,
-            # and not an XUV sat. lum, for the OwWu17 formula we need to 
+            # and not an XUV sat. lum, for the OwWu17 formula we need to
             # invert Lxuv_all, so that we get the corresponding Lx for all Lxuv
             Lx_age_OW17 = undo_what_Lxuv_all_does(
                 L_high_energy(planet.age, planet.mass_star))
@@ -426,7 +427,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
             Lbol = 10**mass_luminosity_relation(planet.mass_star)
             Lx_sat_Tu15 = 10**(-3.13) * Lbol * const.L_sun.cgs.value
             # for the Tu15 tracks we scale the hardcoded values for the
-            # SUN at 1 & 5 Gyr up and down based on the difference in a 
+            # SUN at 1 & 5 Gyr up and down based on the difference in a
             # star's Lx_sat as compared to the Sun
             scaling_factor = Lx_sat_Tu15 / \
                 (10**(-3.13) * (1.0) * const.L_sun.cgs.value)
@@ -443,7 +444,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
                 "Lx_max": planet.Lx_age}
 
         elif Lx_calculation == "1e-3":
-			# need Mass-Luminosity relation to estimate L_bol based on the
+            # need Mass-Luminosity relation to estimate L_bol based on the
             # stellar mass (NOTE: we use a MS M-R raltion and ignore any
             # PRE-MS evolution
             mass_luminosity_relation = mlr.M_L_relation_mamajek()
@@ -452,7 +453,6 @@ def evolve_one_planet_along_one_track(folder_planet_track,
             # we scale the hardcoded values for the SUN at 1 & 5 Gyr up and
             # down based on the difference in a star's Lx_sat as compared
             # to the Sun
-            scaling_factor = Lx_sat_Tu15 / \
             scaling_factor = Lx_age_1e3 / \
                 (10**(-3) * (1.0) * const.L_sun.cgs.value)
             # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
@@ -514,11 +514,13 @@ def evolve_one_planet_along_one_track(folder_planet_track,
 
         #print("Finished: ", planet.planet_id.rstrip(".txt"))
 
+
 def next_chunk(list, chunk_size):
     """ function splits the input list into chuncks of size chunk_size.
     NOTE: what this function does is create and return a generator object.
-    Generators are iterators, but a kind of iterable you can only iterate over once.
-    So generators do not store all the values in memory, they generate the values on the fly.
+    Generators are iterators, but a kind of iterable you can only iterate
+    over once. So generators do not store all the values in memory, they
+    generate the values on the fly.
 
     Parameters:
     -----------
