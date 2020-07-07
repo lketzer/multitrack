@@ -1,17 +1,17 @@
 import os
 import numpy as np
-import multiprocessing as mp
-import multiprocessing
 import time
 import sys
 from astropy import constants as const
+import multiprocessing as mp
+import multiprocessing
 
-# Planet Class
 from platypos.Planet_class_LoFo14 import planet_LoFo14
 import platypos.Planet_class_LoFo14
 import platypos.Planet_models_LoFo14 as plmoLoFo14
 from platypos.Planet_class_Ot20 import planet_Ot20
-from platypos.Lx_evo_and_flux import undo_what_Lxuv_all_does, L_high_energy
+from platypos.Lx_evo_and_flux import L_high_energy
+from platypos.Lx_evo_and_flux import undo_what_Lxuv_all_does
 import platypos.mass_luminosity_relation as mlr 
 
 
@@ -82,9 +82,9 @@ def evolve_one_planet(pl_folder_pair,
 
                 if not os.path.exists(path_for_saving + filename):
                     with open(path_for_saving + filename, "w") as t:
-                    file_content = "t_final,R_th\n"\
-                                    + str(t_final) + ","\
-                                    + str(R_thermal)
+                    	file_content = "t_final,R_th\n" \
+                                    	+ str(t_final) + "," \
+                                    	+ str(R_thermal)
                     t.write(file_content)
             
     # Option 2
