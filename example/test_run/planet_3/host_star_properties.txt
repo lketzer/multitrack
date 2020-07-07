@@ -1,2 +1,0 @@
-star_id,mass_star,radius_star,age,Lbol,Lx_age
-star_age1.0_mass1.03,1.027672583692369,None,1.0,1.0676138541057956,3.029605844799301e+30

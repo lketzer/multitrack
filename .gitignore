@@ -1,5 +1,5 @@
 .*
 __pycache__/
 *.pyc
-evolve_ensemble_old.py
+example/test_run/
 !/.gitignore

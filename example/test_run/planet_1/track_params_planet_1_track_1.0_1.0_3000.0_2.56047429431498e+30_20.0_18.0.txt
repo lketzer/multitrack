@@ -1,2 +1,0 @@
-t_start,t_sat,t_curr,t_5Gyr,Lx_max,Lx_curr,Lx_5Gyr,dt_drop,Lx_drop_factor
-1.0,1.0,1000.0,5000.0,2.56047429431498e+30,1.894819239343789e+28,1.4887865451986914e+27,20.0,18.0
