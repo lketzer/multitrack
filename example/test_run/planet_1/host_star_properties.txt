@@ -1,0 +1,2 @@
+star_id,mass_star,radius_star,age,Lbol,Lx_age
+dummy,0.9853484910214,None,1.0,0.9022948758779951,2.56047429431498e+30
