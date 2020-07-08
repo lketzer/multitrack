@@ -6,12 +6,14 @@ from astropy import constants as const
 import multiprocessing as mp
 import multiprocessing
 
-from platypos.Planet_class_LoFo14 import planet_LoFo14
-import platypos.Planet_class_LoFo14
-import platypos.Planet_models_LoFo14 as plmoLoFo14
-from platypos.Planet_class_Ot20 import planet_Ot20
-from platypos.Lx_evo_and_flux import L_high_energy
-from platypos.Lx_evo_and_flux import undo_what_Lxuv_all_does
+from platypos import Planet_LoFo14
+from platypos import Planet_Ot20
+from platypos.planet_LoFo14_PAPER import Planet_LoFo14_PAPER
+from platypos.planet_Ot20_PAPER import Planet_Ot20_PAPER
+import platypos.planet_models_LoFo14 as plmoLoFo14
+
+from platypos.lx_evo_and_flux import l_high_energy
+from platypos.lx_evo_and_flux import undo_what_Lxuv_all_does
 import platypos.mass_luminosity_relation as mlr
 
 
@@ -108,16 +110,20 @@ def evolve_one_planet(pl_folder_pair,
 
                 # calculate radius at t_final if planet would undergo ONLY
                 # thermal contraction and save to file
-                R_thermal = plmoLoFo14.calculate_planet_radius(
-                    pl.core_mass, pl.fenv, t_final, pl.flux, pl.metallicity)
-                filename = folder + "_thermal_contr.txt"
+                try: 
+                    R_thermal = plmoLoFo14.calculate_planet_radius(
+                        pl.core_mass, pl.fenv, t_final, pl.flux, pl.metallicity)
+                    filename = folder + "_thermal_contr.txt"
 
-                if not os.path.exists(path_for_saving + filename):
-                    with open(path_for_saving + filename, "w") as t:
-                        file_content = "t_final,R_th\n" \
-                            + str(t_final) + "," \
-                            + str(R_thermal)
-                    t.write(file_content)
+                    if not os.path.exists(path_for_saving + filename):
+                        with open(path_for_saving + filename, "w") as t:
+                            file_content = "t_final,R_th\n" \
+                                + str(t_final) + "," \
+                                + str(R_thermal)
+                        t.write(file_content)
+                except:
+                    pass
+
 
     # Option 2
     else:
@@ -146,7 +152,11 @@ def evolve_one_planet(pl_folder_pair,
         #     4) "1e-3": simple approximation of saturation regime:
         #                               Lx/Lbol ~ 10^(-3))
 
-        Lx_calculation = pl.Lx_sat_info
+        try:
+            Lx_calculation = pl.Lx_sat_info
+        except:
+            raise ValueError("No info about how to calculate Lx_sat specified!")
+
         if Lx_calculation == "OwWu17":
             # OwWu 17
             # NOTE: since platypos expects a X-ray saturation luminosity,
@@ -181,7 +191,7 @@ def evolve_one_planet(pl_folder_pair,
             # need Mass-Luminosity relation to estimate L_bol based on the
             # stellar mass (NOTE: we use a MS M-R raltion and ignore any
             # PRE-MS evolution
-            mass_luminosity_relation = mlr.M_L_relation_mamajek()
+            mass_luminosity_relation = mlr.mass_lum_relation_mamajek()
             Lbol = 10**mass_luminosity_relation(pl.mass_star)
             Lx_sat_Tu15 = 10**(-3.13) * Lbol * const.L_sun.cgs.value
             # for the Tu15 tracks we scale the hardcoded values for the
@@ -205,7 +215,7 @@ def evolve_one_planet(pl_folder_pair,
             # need Mass-Luminosity relation to estimate L_bol based on the
             # stellar mass (NOTE: we use a MS M-R raltion and ignore any
             # PRE-MS evolution
-            mass_luminosity_relation = mlr.M_L_relation_mamajek()
+            mass_luminosity_relation = mlr.mass_lum_relation_mamajek()
             Lbol = 10**mass_luminosity_relation(pl.mass_star)
             Lx_age_1e3 = 10**(-3.0) * Lbol * const.L_sun.cgs.value
             scaling_factor = Lx_age_1e3 / \
@@ -248,17 +258,20 @@ def evolve_one_planet(pl_folder_pair,
                     path_for_saving=path_for_saving,
                     planet_folder_id=folder)
 
-                # calculate radius at t_final if planet would undergo ONLY
-                # thermal contraction and save to file
-                R_thermal = plmoLoFo14.calculate_planet_radius(
-                    pl.core_mass, pl.fenv, t_final, pl.flux, pl.metallicity)
-                filename = folder + "_thermal_contr.txt"
-                if not os.path.exists(path_for_saving + filename):
-                    with open(path_for_saving + filename, "w") as t:
-                        file_content = "t_final,R_th\n"\
-                            + str(t_final) + ","\
-                            + str(R_thermal)
-                        t.write(file_content)
+                try:
+                    # calculate radius at t_final if planet would undergo ONLY
+                    # thermal contraction and save to file
+                    R_thermal = plmoLoFo14.calculate_planet_radius(
+                        pl.core_mass, pl.fenv, t_final, pl.flux, pl.metallicity)
+                    filename = folder + "_thermal_contr.txt"
+                    if not os.path.exists(path_for_saving + filename):
+                        with open(path_for_saving + filename, "w") as t:
+                            file_content = "t_final,R_th\n"\
+                                + str(t_final) + ","\
+                                + str(R_thermal)
+                            t.write(file_content)
+                except:
+                    pass
 
 
 def evolve_one_planet_along_one_track(folder_planet_track,
@@ -347,20 +360,23 @@ def evolve_one_planet_along_one_track(folder_planet_track,
                 path_for_saving=path_for_saving,
                 planet_folder_id=folder)
 
-            # calculate radius at t_final if planet would undergo ONLY
-            # thermal contraction and save to file
-            R_thermal = plmoLoFo14.calculate_planet_radius(planet.core_mass,
-                                                           planet.fenv,
-                                                           t_final,
-                                                           planet.flux,
-                                                           planet.metallicity)
-            filename = folder + "_thermal_contr.txt"
-            if not os.path.exists(path_for_saving + filename):
-                with open(path_for_saving + filename, "w") as t:
-                    file_content = "t_final,R_th\n"\
-                        + str(t_final) + ","\
-                        + str(R_thermal)
-                    t.write(file_content)
+            try:
+                # calculate radius at t_final if planet would undergo ONLY
+                # thermal contraction and save to file
+                R_thermal = plmoLoFo14.calculate_planet_radius(planet.core_mass,
+                                                               planet.fenv,
+                                                               t_final,
+                                                               planet.flux,
+                                                               planet.metallicity)
+                filename = folder + "_thermal_contr.txt"
+                if not os.path.exists(path_for_saving + filename):
+                    with open(path_for_saving + filename, "w") as t:
+                        file_content = "t_final,R_th\n"\
+                            + str(t_final) + ","\
+                            + str(R_thermal)
+                        t.write(file_content)
+            except:
+                pass
 
     # Option 2
     else:
@@ -386,7 +402,11 @@ def evolve_one_planet_along_one_track(folder_planet_track,
         #     4) "1e-3": simple approximation of saturation regime:
         #                               Lx/Lbol ~ 10^(-3))
 
-        Lx_calculation = planet.Lx_sat_info
+        try:
+            Lx_calculation = planet.Lx_sat_info
+        except:
+            raise ValueError("No info about how to calculate Lx_sat specified!")
+            
         if Lx_calculation == "OwWu17":
             # OwWu 17
             # NOTE: since platypos expects a X-ray saturation luminosity,
@@ -423,7 +443,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
             # need Mass-Luminosity relation to estimate L_bol based on the
             # stellar mass (NOTE: we use a MS M-R raltion and ignore any
             # PRE-MS evolution
-            mass_luminosity_relation = mlr.M_L_relation_mamajek()
+            mass_luminosity_relation = mlr.mass_lum_relation_mamajek()
             Lbol = 10**mass_luminosity_relation(planet.mass_star)
             Lx_sat_Tu15 = 10**(-3.13) * Lbol * const.L_sun.cgs.value
             # for the Tu15 tracks we scale the hardcoded values for the
@@ -447,7 +467,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
             # need Mass-Luminosity relation to estimate L_bol based on the
             # stellar mass (NOTE: we use a MS M-R raltion and ignore any
             # PRE-MS evolution
-            mass_luminosity_relation = mlr.M_L_relation_mamajek()
+            mass_luminosity_relation = mlr.mass_lum_relation_mamajek()
             Lbol = 10**mass_luminosity_relation(planet.mass_star)
             Lx_age_1e3 = 10**(-3.0) * Lbol * const.L_sun.cgs.value
             # we scale the hardcoded values for the SUN at 1 & 5 Gyr up and
@@ -497,20 +517,23 @@ def evolve_one_planet_along_one_track(folder_planet_track,
                 path_for_saving=path_for_saving,
                 planet_folder_id=folder)
 
-            # calculate radius at t_final if planet would undergo ONLY thermal
-            # contraction and save to file
-            R_thermal = plmoLoFo14.calculate_planet_radius(planet.core_mass,
-                                                           planet.fenv,
-                                                           t_final,
-                                                           planet.flux,
-                                                           planet.metallicity)
-            filename = folder + "_thermal_contr.txt"
-            if not os.path.exists(path_for_saving + filename):
-                with open(path_for_saving + filename, "w") as t:
-                    file_content = "t_final,R_th\n"\
-                        + str(t_final) + ","\
-                        + str(R_thermal)
-                    t.write(file_content)
+            try:
+                # calculate radius at t_final if planet would undergo ONLY thermal
+                # contraction and save to file
+                R_thermal = plmoLoFo14.calculate_planet_radius(planet.core_mass,
+                                                               planet.fenv,
+                                                               t_final,
+                                                               planet.flux,
+                                                               planet.metallicity)
+                filename = folder + "_thermal_contr.txt"
+                if not os.path.exists(path_for_saving + filename):
+                    with open(path_for_saving + filename, "w") as t:
+                        file_content = "t_final,R_th\n"\
+                            + str(t_final) + ","\
+                            + str(R_thermal)
+                        t.write(file_content)
+            except:
+                pass
 
         #print("Finished: ", planet.planet_id.rstrip(".txt"))
 
