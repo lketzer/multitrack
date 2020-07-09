@@ -137,6 +137,7 @@ def create_file_structure_for_saving_results_and_return_planet_folder_pairs(
     # (e.g. {"planet0001": planet_object_instance})
     # get the individual planet folder names
     result_folders = os.listdir(path_save)
+    result_folders.sort()
     planets_dict = {}
     for i in range(len(list_planets)):
         planets_dict[result_folders[i]] = list_planets[i]
