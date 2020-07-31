@@ -190,6 +190,24 @@ def create_arg_list_one_planet_along_one_track(
 
     return arg_tuple_list
 
+def create_arg_list_one_planet_along_one_track_HBA(
+        folder_planet_track_list,
+        t_final,
+        initial_step_size,
+        path_save):
+    """ Create the input argument list
+    for evolve_one_planet_along_one_track
+    """
+    arg_tuple_list = []
+    for i in range(len(folder_planet_track_list)):
+        arg_tuple_list.append(
+            (folder_planet_track_list[i],
+             t_final,
+             initial_step_size,
+             path_save + folder_planet_track_list[i][0] + "/"))
+
+    return arg_tuple_list
+
 
 def create_arg_list_one_planet(
         folder_planet_list,
