@@ -20,8 +20,8 @@ except:
 
 # set up setuptools
 setuptools.setup(
-    name="multi_track",
-    version="1.1.6",
+    name="multitrack",
+    version="1.1.1",
     author='Laura Ketzer',
     author_email='lketzer@aip.de',
     description='Addition to PLATYPOS',
