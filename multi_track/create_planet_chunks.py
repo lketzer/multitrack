@@ -173,7 +173,9 @@ def create_arg_list_one_planet_along_one_track(
         epsilon,
         K,
         beta,
-        path_save):
+        path_save,
+        beta_cutoff=False,
+        relation_EUV="Linsky"):
     """ Create the input argument list
     for evolve_one_planet_along_one_track
     """
@@ -186,7 +188,9 @@ def create_arg_list_one_planet_along_one_track(
              epsilon,
              K,
              beta,
-             path_save + folder_planet_track_list[i][0] + "/"))
+             path_save + folder_planet_track_list[i][0] + "/",
+             beta_cutoff,
+             relation_EUV))
 
     return arg_tuple_list
 
@@ -194,7 +198,8 @@ def create_arg_list_one_planet_along_one_track_HBA(
         folder_planet_track_list,
         t_final,
         initial_step_size,
-        path_save):
+        path_save,
+        relation_EUV):
     """ Create the input argument list
     for evolve_one_planet_along_one_track
     """
@@ -204,7 +209,8 @@ def create_arg_list_one_planet_along_one_track_HBA(
             (folder_planet_track_list[i],
              t_final,
              initial_step_size,
-             path_save + folder_planet_track_list[i][0] + "/"))
+             path_save + folder_planet_track_list[i][0] + "/",
+             relation_EUV))
 
     return arg_tuple_list
 

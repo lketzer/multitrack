@@ -163,9 +163,9 @@ def evolve_one_planet(pl_folder_pair,
             # and not an XUV sat. lum, for the OwWu17 formula we need to
             # invert Lxuv_all, so that we get the corresponding Lx for all Lxuv
             Lx_age_OW17 = undo_what_Lxuv_all_does(
-                L_high_energy(pl.age, pl.mass_star))
-            Lx_1Gyr = undo_what_Lxuv_all_does(L_high_energy(1e3, pl.mass_star))
-            Lx_5Gyr = undo_what_Lxuv_all_does(L_high_energy(5e3, pl.mass_star))
+                l_high_energy(pl.age, pl.mass_star))
+            Lx_1Gyr = undo_what_Lxuv_all_does(l_high_energy(1e3, pl.mass_star))
+            Lx_5Gyr = undo_what_Lxuv_all_does(l_high_energy(5e3, pl.mass_star))
             same_track_params = {
                 "t_start": pl.age,
                 "t_curr": 1e3,
@@ -176,9 +176,9 @@ def evolve_one_planet(pl_folder_pair,
 
         elif Lx_calculation == "OwWu17_X=HE":
             # OwWu 17, with Lx,sat = L_HE,sat
-            Lx_age_OW17_HE = L_high_energy(pl.age, pl.mass_star)
-            Lx_1Gyr = L_high_energy(1e3, pl.mass_star)
-            Lx_5Gyr = L_high_energy(5e3, pl.mass_star)
+            Lx_age_OW17_HE = l_high_energy(pl.age, pl.mass_star)
+            Lx_1Gyr = l_high_energy(1e3, pl.mass_star)
+            Lx_5Gyr = l_high_energy(5e3, pl.mass_star)
             same_track_params = {
                 "t_start": pl.age,
                 "t_curr": 1e3,
@@ -277,7 +277,9 @@ def evolve_one_planet(pl_folder_pair,
 def evolve_one_planet_along_one_track(folder_planet_track,
                                       t_final, initial_step_size,
                                       epsilon, K_on, beta_on,
-                                      path_for_saving):
+                                      path_for_saving,
+                                      beta_cutoff=False,
+                                      relation_EUV="Linsky"):
     """
     Function evolves one planet (pl) at a time through one stellar
     evolutionary track.
@@ -311,7 +313,7 @@ def evolve_one_planet_along_one_track(folder_planet_track,
     initial_step_size (float): Initial step size for the integration
                                                    (e.g. 0.1 Myr)
 
-    eepsilon (float): Evaporation efficiency (constant); should be a
+    epsilon (float): Evaporation efficiency (constant); should be a
                      value between 0 and 1 in the platypos framework
 
     K_on (str): "yes" to use K-estimation, or "no" to set K=1
@@ -358,7 +360,9 @@ def evolve_one_planet_along_one_track(folder_planet_track,
                 beta_on,
                 evo_track_dict=track_dict,
                 path_for_saving=path_for_saving,
-                planet_folder_id=folder)
+                planet_folder_id=folder,
+                beta_cutoff=beta_cutoff,
+                relation_EUV=relation_EUV)
 
             try:
                 # calculate radius at t_final if planet would undergo ONLY
@@ -413,11 +417,11 @@ def evolve_one_planet_along_one_track(folder_planet_track,
             # and not an XUV sat. lum, for the OwWu17 formula we need to
             # invert Lxuv_all, so that we get the corresponding Lx for all Lxuv
             Lx_age_OW17 = undo_what_Lxuv_all_does(
-                L_high_energy(planet.age, planet.mass_star))
+                l_high_energy(planet.age, planet.mass_star))
             Lx_1Gyr = undo_what_Lxuv_all_does(
-                L_high_energy(1e3, planet.mass_star))
+                l_high_energy(1e3, planet.mass_star))
             Lx_5Gyr = undo_what_Lxuv_all_does(
-                L_high_energy(5e3, planet.mass_star))
+                l_high_energy(5e3, planet.mass_star))
             same_track_params = {
                 "t_start": planet.age,
                 "t_curr": 1e3,
@@ -428,9 +432,9 @@ def evolve_one_planet_along_one_track(folder_planet_track,
 
         elif Lx_calculation == "OwWu17_X=HE":
             # OwWu 17, with Lx,sat = L_HE,sat
-            Lx_age_OW17_HE = L_high_energy(planet.age, planet.mass_star)
-            Lx_1Gyr = L_high_energy(1e3, planet.mass_star)
-            Lx_5Gyr = L_high_energy(5e3, planet.mass_star)
+            Lx_age_OW17_HE = l_high_energy(planet.age, planet.mass_star)
+            Lx_1Gyr = l_high_energy(1e3, planet.mass_star)
+            Lx_5Gyr = l_high_energy(5e3, planet.mass_star)
             same_track_params = {
                 "t_start": planet.age,
                 "t_curr": 1e3,
@@ -515,7 +519,9 @@ def evolve_one_planet_along_one_track(folder_planet_track,
                 beta_on,
                 evo_track_dict=track_dict_complete,
                 path_for_saving=path_for_saving,
-                planet_folder_id=folder)
+                planet_folder_id=folder,
+                beta_cutoff=beta_cutoff,
+                relation_EUV=relation_EUV)
 
             try:
                 # calculate radius at t_final if planet would undergo ONLY thermal
@@ -684,9 +690,9 @@ def evolve_one_planet_HBA(pl_folder_pair,
             # and not an XUV sat. lum, for the OwWu17 formula we need to
             # invert Lxuv_all, so that we get the corresponding Lx for all Lxuv
             Lx_age_OW17 = undo_what_Lxuv_all_does(
-                L_high_energy(pl.age, pl.mass_star))
-            Lx_1Gyr = undo_what_Lxuv_all_does(L_high_energy(1e3, pl.mass_star))
-            Lx_5Gyr = undo_what_Lxuv_all_does(L_high_energy(5e3, pl.mass_star))
+                l_high_energy(pl.age, pl.mass_star))
+            Lx_1Gyr = undo_what_Lxuv_all_does(l_high_energy(1e3, pl.mass_star))
+            Lx_5Gyr = undo_what_Lxuv_all_does(l_high_energy(5e3, pl.mass_star))
             same_track_params = {
                 "t_start": pl.age,
                 "t_curr": 1e3,
@@ -697,9 +703,9 @@ def evolve_one_planet_HBA(pl_folder_pair,
 
         elif Lx_calculation == "OwWu17_X=HE":
             # OwWu 17, with Lx,sat = L_HE,sat
-            Lx_age_OW17_HE = L_high_energy(pl.age, pl.mass_star)
-            Lx_1Gyr = L_high_energy(1e3, pl.mass_star)
-            Lx_5Gyr = L_high_energy(5e3, pl.mass_star)
+            Lx_age_OW17_HE = l_high_energy(pl.age, pl.mass_star)
+            Lx_1Gyr = l_high_energy(1e3, pl.mass_star)
+            Lx_5Gyr = l_high_energy(5e3, pl.mass_star)
             same_track_params = {
                 "t_start": pl.age,
                 "t_curr": 1e3,
@@ -929,11 +935,11 @@ def evolve_one_planet_along_one_track_HBA(folder_planet_track,
             # and not an XUV sat. lum, for the OwWu17 formula we need to
             # invert Lxuv_all, so that we get the corresponding Lx for all Lxuv
             Lx_age_OW17 = undo_what_Lxuv_all_does(
-                L_high_energy(planet.age, planet.mass_star))
+                l_high_energy(planet.age, planet.mass_star))
             Lx_1Gyr = undo_what_Lxuv_all_does(
-                L_high_energy(1e3, planet.mass_star))
+                l_high_energy(1e3, planet.mass_star))
             Lx_5Gyr = undo_what_Lxuv_all_does(
-                L_high_energy(5e3, planet.mass_star))
+                l_high_energy(5e3, planet.mass_star))
             same_track_params = {
                 "t_start": planet.age,
                 "t_curr": 1e3,
@@ -944,9 +950,9 @@ def evolve_one_planet_along_one_track_HBA(folder_planet_track,
 
         elif Lx_calculation == "OwWu17_X=HE":
             # OwWu 17, with Lx,sat = L_HE,sat
-            Lx_age_OW17_HE = L_high_energy(planet.age, planet.mass_star)
-            Lx_1Gyr = L_high_energy(1e3, planet.mass_star)
-            Lx_5Gyr = L_high_energy(5e3, planet.mass_star)
+            Lx_age_OW17_HE = l_high_energy(planet.age, planet.mass_star)
+            Lx_1Gyr = l_high_energy(1e3, planet.mass_star)
+            Lx_5Gyr = l_high_energy(5e3, planet.mass_star)
             same_track_params = {
                 "t_start": planet.age,
                 "t_curr": 1e3,
