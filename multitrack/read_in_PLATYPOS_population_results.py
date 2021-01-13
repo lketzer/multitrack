@@ -10,7 +10,7 @@ from platypos.mass_loss_rate_function import mass_loss_rate_forward_LO14_shortsh
 from platypos.lx_evo_and_flux import l_xuv_all
 from platypos.lx_evo_and_flux import flux_at_planet
 from platypos.beta_K_functions import beta_fct
-import multi_track.keplers_3rd_law as kepler3
+import multitrack.keplers_3rd_law as kepler3
 
 
 def read_results_file(path, filename):
