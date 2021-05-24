@@ -39,7 +39,8 @@ def create_planet_chunks(curr_path, folder_name, list_planets, chunk_size):
 
     # First, check if directroy for saving the results exists, if not create
     # one
-    path_save = curr_path + folder_name
+    path_save = os.path.join(curr_path, folder_name)
+    print(path_save)
     if os.path.isdir(path_save):
         print("Folder " + folder_name + " exists.")
         pass
@@ -50,23 +51,28 @@ def create_planet_chunks(curr_path, folder_name, list_planets, chunk_size):
     # (what this means: two planets with the exact same parametes will
     # get two different folders); for consistent folder names fill string
     # with zeros to have same length
+    
+    print(len(list_planets))
+    
     digits_of_planet_number = len(str(len(list_planets)))
     for i in range(len(list_planets)):
         planet_number_str = str(i + 1)  # start planet number at 1
         # e.g. 1000 planets -> 'planet_0001' is the first folder name
         planet_id = "planet_" + \
-            planet_number_str.zfill(digits_of_planet_number)
+                     planet_number_str.zfill(digits_of_planet_number)
         # if exists, skip, else create the folder
-        if os.path.isdir(path_save + planet_id):
+        print(os.path.join(path_save, planet_id))
+        if os.path.isdir(os.path.join(path_save, planet_id)):
             pass
         else:
-            os.mkdir(path_save + planet_id)
+            os.mkdir(os.path.join(path_save, planet_id))
 
     # create a dictionary with planet subfolder names as key, and corresponding
     # planet objects as value (one planet belongs into one seperate folder)
     # (e.g. {"planet0001": planet_object_instance})
     # get the individual planet folder names
     result_folders = os.listdir(path_save)
+    print(result_folders)
     planets_dict = {}
     for i in range(len(list_planets)):
         planets_dict[result_folders[i]] = list_planets[i]
@@ -109,12 +115,13 @@ def create_file_structure_for_saving_results_and_return_planet_folder_pairs(
     """
 
     # First, check if directroy for saving the results exists, if not create
-    path_save = curr_path + folder_name
+    path_save = os.path.join(curr_path, folder_name)
     if os.path.isdir(path_save):
         print("Folder " + folder_name + " exists.")
         pass
     else:
         os.mkdir(path_save)
+        print(path_save)
 
     # Next, create subfolders - one for each planet in the population
     # (what this means: two planets with the exact same parametes will get
@@ -125,12 +132,12 @@ def create_file_structure_for_saving_results_and_return_planet_folder_pairs(
         planet_number_str = str(i + 1)  # start planet number at 1
         # e.g. 1000 planets -> 'planet_0001' is the first folder name
         planet_id = "planet_" + \
-            planet_number_str.zfill(digits_of_planet_number)
+                     planet_number_str.zfill(digits_of_planet_number)
         # if exists, skip, else create the folder
-        if os.path.isdir(path_save + planet_id):
+        if os.path.isdir(os.path.join(path_save, planet_id)):
             pass
         else:
-            os.mkdir(path_save + planet_id)
+            os.mkdir(os.path.join(path_save, planet_id))
 
     # create a dictionary with planet subfolder names as key, and corresponding
     # planet objects as value (one planet belongs into one seperate folder)
@@ -174,8 +181,9 @@ def create_arg_list_one_planet_along_one_track(
         K,
         beta,
         path_save,
-        beta_cutoff=False,
-        relation_EUV="Linsky"):
+        beta_cutoff=True,
+        relation_EUV="Linsky",
+        mass_loss_calc="Elim_and_RRlim"):
     """ Create the input argument list
     for evolve_one_planet_along_one_track
     """
@@ -190,9 +198,40 @@ def create_arg_list_one_planet_along_one_track(
              beta,
              path_save + folder_planet_track_list[i][0] + "/",
              beta_cutoff,
-             relation_EUV))
+             relation_EUV,
+             mass_loss_calc))
 
     return arg_tuple_list
+
+def create_arg_list_1planet_1track(folder_planet_track_list,
+                                    t_final,
+                                    initial_step_size,
+                                    epsilon,
+                                    K,
+                                    beta_settings,
+                                    path_save,
+                                    relation_EUV="Linsky",
+                                    mass_loss_calc="Elim_and_RRlim",
+                                    fenv_sample_cut=False):
+    """ Create the input argument list
+    for evolve_one_planet_along_one_track
+    """
+    arg_tuple_list = []
+    for i in range(len(folder_planet_track_list)):
+        arg_tuple_list.append(
+            (folder_planet_track_list[i],
+             t_final,
+             initial_step_size,
+             epsilon,
+             K,
+             beta_settings,
+             os.path.join(path_save, folder_planet_track_list[i][0]),
+             relation_EUV,
+             mass_loss_calc,
+             fenv_sample_cut))
+
+    return arg_tuple_list
+
 
 def create_arg_list_one_planet_along_one_track_HBA(
         folder_planet_track_list,
