@@ -312,11 +312,17 @@ def evolve_1planet_1track(folder_planet_track,
     K_on (str): "yes" to use K-estimation, or "no" to set K=1
                 (see Beta_K_functions in platypos_package)
 
-    beta_on (str): "yes" to use beta-estimation, or "no" to set beta=1
-                   (see Beta_K_functions in platypos_package)
+    beta (dict):
 
     path_for_saving (str): file path to master folder in which the
                                            individual planet folders lie
+                                           
+                                           
+    relation_EUV (str):
+    
+    mass_loss_calc (str):
+    
+    fenv_sample_cut (bool): only matters for LoFo14 & ChRo16 planets
 
     Returns:
     --------

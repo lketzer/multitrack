@@ -81,9 +81,9 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
     # not evolved yet)
     non_empty_folders = []
     for f in files:
-        if len(os.listdir(path_to_results + f)) == 0:
+        if len(os.listdir(os.path.join(path_to_results, f))) == 0:
             pass
-        elif len([file for file in os.listdir(path_to_results + f) \
+        elif len([file for file in os.listdir(os.path.join(path_to_results, f)) \
                   if f in file and "track" in file]) == 0:
             # this means no output file has been produced by PLATYPOS for any
             #  of the tracks (the filenames start with f and contain "track)")
@@ -103,7 +103,7 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
     for i, f in enumerate(non_empty_folders):
         # f: folder name
         # get all files in one planet directory
-        all_files_in_f = [f for f in os.listdir(path_to_results + f) \
+        all_files_in_f = [f for f in os.listdir(os.path.join(path_to_results, f)) \
                           if not f.startswith('.')]
         # NOTE: I had an instance where there were hidden files in a folder,
         # so this is to make sure hidden files (starting with ".") are ignored!
@@ -136,7 +136,8 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
         # are available
         if N_tracks_subfolder == N_tracks:
             # get file with initial planet params (name: f+".txt")
-            df_pl = pd.read_csv(path_to_results + f + "/" + f + ".txt",
+            #path_to_results + f + "/" + f + ".txt"
+            df_pl = pd.read_csv(os.path.join(path_to_results, f, f + ".txt"),
                                 float_precision='round_trip')
             planet_init_dict[f] = df_pl.values[0]  # add to dictionary
             # build dataframe with results from all tracks
@@ -144,7 +145,8 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
             # read in the results file for each track one by one and build up
             # one single (one-row) dataframe per planet
             for file in result_files_sorted:
-                df_i = pd.read_csv(path_to_results + f + "/" + file,
+                #path_to_results + f + "/" + file
+                df_i = pd.read_csv(os.path.join(path_to_results, f, file),
                                    float_precision='round_trip')
                 df_all_tracks = pd.concat([df_all_tracks, df_i], axis=1)
                 # df.reset_index(level=0)
@@ -515,7 +517,7 @@ def read_in_thermal_contraction_radius(path_to_results):
 
 
 def read_in_PLATYPOS_results_dataframe(path_to_results, N_tracks,
-                                       return_second_to_last):
+                                       return_second_to_last=False):
     """
     Calls read_in_PLATYPOS_results_fullEvo & then does some more 
     re-aranging to the data to make it easier to handle.
