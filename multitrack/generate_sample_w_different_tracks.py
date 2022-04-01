@@ -1,8 +1,10 @@
+import os
 import pandas as pd
 import scipy.stats
 
 
-def generate_different_tracks_sample(run, new_tracks=True, tsat100=True):
+def generate_different_tracks_sample(run, new_tracks=True, tsat100=True,
+                                     path_save=None, filename=None):
     """ 
     Use my previously generated track probability distribution to generate a
     planetary sample consisting of host stars evolving through different 
@@ -147,10 +149,15 @@ def generate_different_tracks_sample(run, new_tracks=True, tsat100=True):
     run_mix_skew["track#"] = track_mix_skew
     run_mix_norm["track#"] = track_mix_norm
     
+    if (path_save != None) and (filename != None):
+        run_mix_skew.to_csv(os.path.join(path_save, filename+"_skew.csv"))
+        run_mix_norm.to_csv(os.path.join(path_save, filename+"_norm.csv"))
+    
     return run_mix_skew, run_mix_norm
 
 
-def generate_different_tracks_sample_snapshots(run_st, run_mix):
+def generate_different_tracks_sample_snapshots(run_st, run_mix,
+                                               path_save=None, filename=None):
     """
     Creates a dataframe which contains all the the snapshots
     for the previously generated mixed track sample.
@@ -206,4 +213,56 @@ def generate_different_tracks_sample_snapshots(run_st, run_mix):
         # append snapshot time df to final df
         run_st_mix = pd.concat([run_st_mix, run_one_st_mix], axis=1)    
     
+    if (path_save != None) and (filename != None):
+        run_st_mix.to_csv(os.path.join(path_save, filename+"_st.csv"))
+    
     return run_st_mix
+
+
+def read_in_or_create_mixed_sample(run, path, filename):
+    """ read in or create mixed sample (skew & norm)
+    Returns:
+    -------
+    2 dataframes: run_skew, run_norm
+    """
+    if os.path.exists(os.path.join(path, filename+"_norm.csv")) and \
+       os.path.exists(os.path.join(path, filename+"_skew.csv")):
+        # read in the results (if table has been created)
+        print("Files exist.")
+        run_skew = pd.read_csv(os.path.join(path, filename+"_skew.csv"),
+                               index_col="Unnamed: 0", float_precision='round_trip')
+        run_norm = pd.read_csv(os.path.join(path, filename+"_norm.csv"),
+                               index_col="Unnamed: 0", float_precision='round_trip')
+    else:
+        print("Create mixed sample.")
+        run_skew, run_norm = generate_different_tracks_sample(run, path_save=path,
+                                                              filename=filename)
+        
+    return run_skew, run_norm
+
+
+def read_in_or_create_mixed_snap_sample(run_st, run_skew, run_norm,
+                                        path, filename):
+    """ read in or create mixed snapshots sample (skew & norm)
+    Returns:
+    -------
+    2 dataframes: run_st_skew, run_st_norm
+    """
+    if os.path.exists(os.path.join(path, filename+"_norm_st.csv")) and \
+       os.path.exists(os.path.join(path, filename+"_skew_st.csv")):
+        # read in the results (if table has been created)
+        print("Files exist.")
+        run_st_skew = pd.read_csv(os.path.join(path, filename+"_skew_st.csv"),
+                               index_col="Unnamed: 0", float_precision='round_trip')
+        run_st_norm = pd.read_csv(os.path.join(path, filename+"_norm_st.csv"),
+                               index_col="Unnamed: 0", float_precision='round_trip')
+    else:
+        print("Create mixed st sample.")
+        run_st_skew = generate_different_tracks_sample_snapshots(
+                                                run_st, run_skew,
+                                                path_save=path, filename=filename+"_skew")
+        run_st_norm = generate_different_tracks_sample_snapshots(
+                                                run_st, run_norm,
+                                                path_save=path, filename=filename+"_norm")
+                
+    return run_st_skew, run_st_norm

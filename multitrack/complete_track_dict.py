@@ -5,9 +5,13 @@ import platypos.mass_luminosity_relation as mlr
 from platypos.lx_evo_and_flux import l_high_energy#calculate_Lx_sat
 
 
-def complete_track_dict(pl, track_dict, Lx_calculation="Tu15", 
-                        ML_rel="ZAMS_Thomas"):
-    """ sometimes I have only the track parameters from my distribution tracks.
+def complete_track_dict(pl,
+                        track_dict,
+                        Lx_calculation="Tu15", 
+                        ML_rel="ZAMS_Thomas",
+                        Lx1Gyr="Jackson12"):
+    """
+    sometimes I have only the track parameters from my distribution tracks.
     (t_sat, t_drop, Lx_drop_factor)
     -> calculate rest of params based on stellar mass and the Lx,sat formula.
     
@@ -31,9 +35,24 @@ def complete_track_dict(pl, track_dict, Lx_calculation="Tu15",
                          4) "1e-3": simple approximation of saturation regime:
                              Lx/Lbol ~ 10^(-3))"
                          5) "Kuby20": 
+                         6) "Jo20": Rx_sat = 5.135 * 1e-4
+                                    Lx_sat = Rx_sat * (Lbol * const.L_sun.cgs.value)
                          
     ML_rel (str): "ZAMS_Thomas", or "MS_Mamajeck"
-                            
+    Lx1Gyr (str): default = "Jackson12" - uses the median Lx value for G-type
+                  stars from the 620 Myr cluster from Jackson 2012 and the Lx-decay
+                  slope from that paper to estimate the Lx value at 1 and 5 Gyr
+                  (necessary for creating the tracks);
+                  if something else, use the values from the Tu paper -> steeper
+                  slope and lower Lx-values!
+                  Jackson 2012 cluster at 620 Myr: Lx_med = 1e+29, age_med = 620.8
+                  slope = -1.13
+                  log10Lx = slope * (np.log10(5e3)-np.log10(age_med)) + np.log10(Lx_med)
+                  Lx_5Gyr = 10**log10Lx
+                  f = scipy.interpolate.interp1d([np.log10(age_med), np.log10(5e3)], [np.log10(Lx_med), np.log10(5e3)])
+                  Lx_1Gyr = 10**float(f(np.log10(1e3)))
+                  Lx_5Gyr = 10**float(f(np.log10(5e3)))
+    
     Return:
     -------
     track (dict): full track dictionary with 9 parameters
@@ -54,13 +73,6 @@ def complete_track_dict(pl, track_dict, Lx_calculation="Tu15",
         Lx_5Gyr = undo_what_Lxuv_all_does(l_high_energy(5e3, pl.mass_star,
                                                         paper=Lx_calculation+"XUV",
                                                         ML_rel=ML_rel))
-
-#     elif Lx_calculation == "OwWu17_X=HE":
-#         # OwWu 17, with Lx,sat = L_HE,sat
-#         Lx_1Gyr = l_high_energy(1e3, pl.mass_star, paper="OwWu17_X=HE",
-#                                 ML_rel=ML_rel)
-#         Lx_5Gyr = l_high_energy(5e3, pl.mass_star, paper="OwWu17_X=HE",
-#                                 ML_rel=ML_rel)
         
     elif Lx_calculation == "Tu15":
         # need Mass-Luminosity relation to estimate L_bol based on the
@@ -71,10 +83,16 @@ def complete_track_dict(pl, track_dict, Lx_calculation="Tu15",
         # SUN at 1 & 5 Gyr up and down based on the difference in a
         # star's Lx_sat as compared to the Sun
         scaling_factor = Lx_sat / Lx_sat_sun
-        # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_1Gyr = 2.10 * 10**28 * scaling_factor
-        # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_5Gyr = 1.65 * 10**27 * scaling_factor
+        
+        if Lx1Gyr == "Jackson12":
+            # Jackson 2012 cluster at 620 Myr
+            Lx_1Gyr = 5.834924518159396e+28 * scaling_factor
+            Lx_5Gyr = 9.466711397257275e+27 * scaling_factor
+        else:
+            # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_1Gyr = 2.10 * 10**28 * scaling_factor
+            # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_5Gyr = 1.65 * 10**27 * scaling_factor
 
     elif Lx_calculation == "1e-3":
         # need Mass-Luminosity relation to estimate L_bol based on the
@@ -83,10 +101,16 @@ def complete_track_dict(pl, track_dict, Lx_calculation="Tu15",
         Lx_sat = l_high_energy(1.0, pl.mass_star, paper="1e-3", ML_rel=ML_rel)
         Lx_sat_sun = l_high_energy(1.0, 1.0, paper="1e-3", ML_rel=ML_rel)
         scaling_factor = Lx_sat / Lx_sat_sun
-        # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_1Gyr = 2.10 * 10**28 * scaling_factor
-        # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_5Gyr = 1.65 * 10**27 * scaling_factor
+        
+        if Lx1Gyr == "Jackson12":
+            # Jackson 2012 cluster at 620 Myr
+            Lx_1Gyr = 5.834924518159396e+28 * scaling_factor
+            Lx_5Gyr = 9.466711397257275e+27 * scaling_factor
+        else:
+            # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_1Gyr = 2.10 * 10**28 * scaling_factor
+            # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_5Gyr = 1.65 * 10**27 * scaling_factor
         
     elif Lx_calculation == "Jo20":
         # need Mass-Luminosity relation to estimate L_bol based on the
@@ -97,10 +121,16 @@ def complete_track_dict(pl, track_dict, Lx_calculation="Tu15",
         Lx_sat_sun = l_high_energy(1.0, 1.0, paper="Johnstone20",
                                    ML_rel=ML_rel)
         scaling_factor = Lx_sat / Lx_sat_sun
-        # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_1Gyr = 2.10 * 10**28 * scaling_factor
-        # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_5Gyr = 1.65 * 10**27 * scaling_factor
+        
+        if Lx1Gyr == "Jackson12":
+            # Jackson 2012 cluster at 620 Myr
+            Lx_1Gyr = 5.834924518159396e+28 * scaling_factor
+            Lx_5Gyr = 9.466711397257275e+27 * scaling_factor
+        else:
+            # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_1Gyr = 2.10 * 10**28 * scaling_factor
+            # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_5Gyr = 1.65 * 10**27 * scaling_factor
 
     same_track_params = {
         "t_start": pl.age,
@@ -121,7 +151,8 @@ def complete_track_dict(pl, track_dict, Lx_calculation="Tu15",
 
 
 def complete_track_dict_noplobj(age, mass_star, track_dict,
-                                Lx_calculation="Tu15", ML_rel="ZAMS_Thomas"):
+                                Lx_calculation="Tu15", ML_rel="ZAMS_Thomas",
+                                Lx1Gyr="Jackson12"):
     """ sometimes I have only the track parameters from my distribution tracks.
     (t_sat, t_drop, Lx_drop_factor)
     -> calculate rest of params based on stellar mass and the Lx,sat formula.
@@ -146,7 +177,19 @@ def complete_track_dict_noplobj(age, mass_star, track_dict,
                              Lx/Lbol ~ 10^(-3))"
                              
     ML_rel (str): "ZAMS_Thomas", or "MS_Mamajeck"
-                            
+    Lx1Gyr (str): default = "Jackson12" - uses the median Lx value for G-type
+                  stars from the 620 Myr cluster from Jackson 2012 and the Lx-decay
+                  slope from that paper to estimate the Lx value at 1 and 5 Gyr
+                  (necessary for creating the tracks);
+                  if something else, use the values from the Tu paper -> steeper
+                  slope and lower Lx-values!
+                  Jackson 2012 cluster at 620 Myr: Lx_med = 1e+29, age_med = 620.8
+                  slope = -1.13
+                  log10Lx = slope * (np.log10(5e3)-np.log10(age_med)) + np.log10(Lx_med)
+                  Lx_5Gyr = 10**log10Lx
+                  f = scipy.interpolate.interp1d([np.log10(age_med), np.log10(5e3)], [np.log10(Lx_med), np.log10(5e3)])
+                  Lx_1Gyr = 10**float(f(np.log10(1e3)))
+                  Lx_5Gyr = 10**float(f(np.log10(5e3)))
     Return:
     -------
     track (dict): full track dictionary with 9 parameters
@@ -185,19 +228,30 @@ def complete_track_dict_noplobj(age, mass_star, track_dict,
         # SUN at 1 & 5 Gyr up and down based on the difference in a
         # star's Lx_sat as compared to the Sun
         scaling_factor = Lx_sat / Lx_sat_sun
-        # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_1Gyr = 2.10 * 10**28 * scaling_factor
-        # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_5Gyr = 1.65 * 10**27 * scaling_factor
+        
+        if Lx1Gyr == "Jackson12":
+            # Jackson 2012 cluster at 620 Myr
+            Lx_1Gyr = 5.834924518159396e+28 * scaling_factor
+            Lx_5Gyr = 9.466711397257275e+27 * scaling_factor
+        else:
+            # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_1Gyr = 2.10 * 10**28 * scaling_factor
+            # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_5Gyr = 1.65 * 10**27 * scaling_factor
 
     elif Lx_calculation == "1e-3":
         Lx_sat = l_high_energy(1.0, mass_star, paper="1e-3", ML_rel=ML_rel)
         Lx_sat_sun = l_high_energy(1.0, 1.0, paper="1e-3", ML_rel=ML_rel)
         scaling_factor = Lx_sat / Lx_sat_sun
-        # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_1Gyr = 2.10 * 10**28 * scaling_factor
-        # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_5Gyr = 1.65 * 10**27 * scaling_factor
+        
+        if Lx1Gyr == "Jackson12":
+            Lx_1Gyr = 5.834924518159396e+28 * scaling_factor
+            Lx_5Gyr = 9.466711397257275e+27 * scaling_factor
+        else:
+            # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_1Gyr = 2.10 * 10**28 * scaling_factor
+            # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_5Gyr = 1.65 * 10**27 * scaling_factor
     
     elif Lx_calculation == "Jo20":
         Lx_sat = l_high_energy(1.0, mass_star, paper="Johnstone20",
@@ -205,10 +259,16 @@ def complete_track_dict_noplobj(age, mass_star, track_dict,
         Lx_sat_sun = l_high_energy(1.0, 1.0, paper="Johnstone20",
                                   ML_rel=ML_rel)
         scaling_factor = Lx_sat / Lx_sat_sun
-        # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_1Gyr = 2.10 * 10**28 * scaling_factor
-        # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
-        Lx_5Gyr = 1.65 * 10**27 * scaling_factor
+        
+        if Lx1Gyr == "Jackson12":
+            # Jackson 2012 cluster at 620 Myr
+            Lx_1Gyr = 5.834924518159396e+28 * scaling_factor
+            Lx_5Gyr = 9.466711397257275e+27 * scaling_factor
+        else:
+            # Lx value at 1 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_1Gyr = 2.10 * 10**28 * scaling_factor
+            # Lx value at 5 Gyr from Tu et al. (2015) model tracks (scaled)
+            Lx_5Gyr = 1.65 * 10**27 * scaling_factor
 
     same_track_params = {"t_start": age,
                          "t_curr": 1e3,

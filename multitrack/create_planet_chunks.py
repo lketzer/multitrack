@@ -183,7 +183,8 @@ def create_arg_list_one_planet_along_one_track(
         path_save,
         beta_cutoff=True,
         relation_EUV="Linsky",
-        mass_loss_calc="Elim_and_RRlim"):
+        mass_loss_calc="Elim_and_RRlim",
+        Lx1Gyr="Jackson12"):
     """ Create the input argument list
     for evolve_one_planet_along_one_track
     """
@@ -199,7 +200,8 @@ def create_arg_list_one_planet_along_one_track(
              path_save + folder_planet_track_list[i][0] + "/",
              beta_cutoff,
              relation_EUV,
-             mass_loss_calc))
+             mass_loss_calc,
+             Lx1Gyr))
 
     return arg_tuple_list
 
@@ -212,7 +214,9 @@ def create_arg_list_1planet_1track(folder_planet_track_list,
                                     path_save,
                                     relation_EUV="Linsky",
                                     mass_loss_calc="Elim_and_RRlim",
-                                    fenv_sample_cut=False):
+                                    fenv_sample_cut=False,
+                                    ML_rel="ZAMS_Thomas",
+                                    Lx1Gyr="Jackson12"):
     """ Create the input argument list
     for evolve_one_planet_along_one_track
     """
@@ -228,7 +232,9 @@ def create_arg_list_1planet_1track(folder_planet_track_list,
              os.path.join(path_save, folder_planet_track_list[i][0]),
              relation_EUV,
              mass_loss_calc,
-             fenv_sample_cut))
+             fenv_sample_cut,
+             ML_rel,
+             Lx1Gyr))
 
     return arg_tuple_list
 

@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+import datatable as dt
 
 from scipy import interpolate
 from scipy.interpolate import CubicSpline
@@ -25,7 +26,7 @@ COLUMNS = 5
 def read_results_file(path, filename):
     """Function to read in the results file for an individual track. """
 
-    df = pd.read_csv(path + filename, float_precision='round_trip')
+    df = dt.fread(path + filename).to_pandas()
     # NOTE: set float_precision to avoid pd doing sth. weird to the last digit
     # Pandas uses a dedicated dec 2 bin converter that compromises accuracy
     # in preference to speed. Passing float_precision='round_trip' to read_csv
@@ -76,6 +77,7 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
     """
     print(path_to_results)
     files = os.listdir(path_to_results)
+    files = [f for f in files if ".json" not in f]
     print("Total # of planet folders = ", len(files))
     # check for empty folders (where maybe sth went wrong, or where planet has
     # not evolved yet)
@@ -146,8 +148,7 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
             # one single (one-row) dataframe per planet
             for file in result_files_sorted:
                 #path_to_results + f + "/" + file
-                df_i = pd.read_csv(os.path.join(path_to_results, f, file),
-                                   float_precision='round_trip')
+                df_i = dt.fread(os.path.join(path_to_results, f, file)).to_pandas()
                 df_all_tracks = pd.concat([df_all_tracks, df_i], axis=1)
                 # df.reset_index(level=0)
 
@@ -249,6 +250,7 @@ def read_in_PLATYPOS_results_final(path_to_results, N_tracks):
     """
     
     files = os.listdir(path_to_results)
+    files = [f for f in files if ".json" not in f]
     print("Total # of planet folders = ", len(files))
     # check for empty folders (where maybe sth went wrong, or where planet has
     # not evolved yet)
@@ -310,6 +312,8 @@ def read_in_PLATYPOS_results_final(path_to_results, N_tracks):
             # get file with initial planet params (name: f+".txt")
             df_pl = pd.read_csv(path_to_results + f + "/" + f + ".txt",
                                 float_precision='round_trip')
+            df_pl_contr = pd.read_csv(path_to_results + f + "/" + f + ".txt",
+                                float_precision='round_trip')
             planet_init_dict[f] = df_pl.values[0]  # add to dictionary
 
             # build dataframe with results from all tracks
@@ -317,8 +321,7 @@ def read_in_PLATYPOS_results_final(path_to_results, N_tracks):
             # read in the results file for each track one by one and build up
             # one single (one-row) dataframe per planet
             for file in result_files_sorted:
-                df_i = pd.read_csv(path_to_results + f + "/" + file,
-                                   float_precision='round_trip')
+                df_i = dt.fread(path_to_results + f + "/" + file).to_pandas()
                 try:
                     df_i["metallicity"]
                     df_i.drop(["a", "core_mass", "metallicity", "track"],
@@ -418,7 +421,7 @@ def read_in_host_star_parameters(path_to_results):
     """
 
     files = os.listdir(path_to_results)
-
+    files = [f for f in files if ".json" not in f]
     # only use non-empty folders
     non_empty_folders = []
     for f in files:
@@ -476,7 +479,7 @@ def read_in_thermal_contraction_radius(path_to_results):
     """
 
     files = os.listdir(path_to_results)
-
+    files = [f for f in files if ".json" not in f]
     # only use non-empty folders
     non_empty_folders = []
     for f in files:
@@ -1302,7 +1305,7 @@ def calculate_mass_loss_rate_new(run, add_parameters):
     add_parameters (dict): dictionary containing all info about the run 
                            e.g. add_parameters = {"epsilon": 0.1, 
                            "beta_settings": {'beta_calc': 'Lopez17', 'RL_cut': True},
-                           "K_on": "yes","mass_loss_calc": "Elim_and_RRlim",
+                           "K_on": "yes", "mass_loss_calc": "Elim_and_RRlim",
                            "relation_EUV": "Linsky"}
     
     Returns:
