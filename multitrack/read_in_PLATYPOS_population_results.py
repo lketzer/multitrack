@@ -79,6 +79,7 @@ def read_in_PLATYPOS_results_fullEvo(path_to_results, N_tracks):
     files = os.listdir(path_to_results)
     files = [f for f in files if ".json" not in f]
     print("Total # of planet folders = ", len(files))
+    
     # check for empty folders (where maybe sth went wrong, or where planet has
     # not evolved yet)
     non_empty_folders = []

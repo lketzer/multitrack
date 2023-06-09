@@ -274,7 +274,10 @@ def evolve_1planet_1track(folder_planet_track,
                           mass_loss_calc="Elim_and_RRlim",
                           fenv_sample_cut=False,
                           ML_rel="ZAMS_Thomas",
-                          Lx1Gyr="Jackson12"):
+                          Lx1Gyr="Jackson12",
+                          forward_backward=False,
+                          t_start=None,
+                          fixed_step_size=False):
     """
     Function evolves one planet (pl) at a time through one stellar
     evolutionary track.
@@ -338,7 +341,7 @@ def evolve_1planet_1track(folder_planet_track,
     track_dict = folder_planet_track[2]
 
     # Option 1
-    if len(track_dict) == 9:
+    if (len(track_dict) >= 9):
         # set planet name based on track params
         
         #beta_on = "yes"
@@ -371,26 +374,47 @@ def evolve_1planet_1track(folder_planet_track,
         # check if result exists, if not evolve planet
         path = os.path.join(path_for_saving, pl_file_name)
         if not os.path.isdir(path):
-            planet.evolve_forward_and_create_full_output(
-                                            t_final,
-                                            initial_step_size,
-                                            epsilon,
-                                            K_on,
-                                            beta_settings,
-                                            evo_track_dict=track_dict,
-                                            path_for_saving=path_for_saving,
-                                            planet_folder_id=folder,
-                                            relation_EUV=relation_EUV,
-                                            mass_loss_calc=mass_loss_calc,
-                                            fenv_sample_cut=fenv_sample_cut)
+            #print(t_final, planet.age)
+            if t_final < planet.age:
+                # evolve backwards in time
+                planet.evolve_backward_and_create_full_output(
+                                              t_final,
+                                              initial_step_size,
+                                              epsilon,
+                                              K_on,
+                                              beta_settings,
+                                              evo_track_dict=track_dict,
+                                              path_for_saving=path_for_saving,
+                                              planet_folder_id=folder,
+                                              relation_EUV=relation_EUV,
+                                              mass_loss_calc=mass_loss_calc,
+                                              fenv_sample_cut=fenv_sample_cut,
+                                              fixed_step_size=fixed_step_size)
+            else:
+                # evolve forward in time
+                planet.evolve_forward_and_create_full_output(
+                                                t_final,
+                                                initial_step_size,
+                                                epsilon,
+                                                K_on,
+                                                beta_settings,
+                                                evo_track_dict=track_dict,
+                                                path_for_saving=path_for_saving,
+                                                planet_folder_id=folder,
+                                                relation_EUV=relation_EUV,
+                                                mass_loss_calc=mass_loss_calc,
+                                                fenv_sample_cut=fenv_sample_cut,
+                                                forward_backward=forward_backward,
+                                                t_start=t_start,
+                                                fixed_step_size=fixed_step_size)
 
-            try:
-                # calculate radius at t_final if planet would undergo ONLY
-                # thermal contraction and save to file
-                write_file_thermal_contraction_radius(planet, t_final, 
-                                                      path_for_saving, folder)
-            except:
-                pass
+                try:
+                    # calculate radius at t_final if planet would undergo ONLY
+                    # thermal contraction and save to file
+                    write_file_thermal_contraction_radius(planet, t_final, 
+                                                          path_for_saving, folder)
+                except:
+                    pass
 
     # Option 2
     else:
@@ -453,7 +477,10 @@ def evolve_1planet_1track(folder_planet_track,
                                             planet_folder_id=folder,
                                             relation_EUV=relation_EUV,
                                             mass_loss_calc=mass_loss_calc,
-                                            fenv_sample_cut=fenv_sample_cut)
+                                            fenv_sample_cut=fenv_sample_cut,
+                                            forward_backward=forward_backward,
+                                            t_start=t_start,
+                                            fixed_step_size=fixed_step_size)
 
             try:
                 # calculate radius at t_final if planet would undergo ONLY thermal
